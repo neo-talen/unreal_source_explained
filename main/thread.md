@@ -7,14 +7,16 @@ For more infomation, see the [repo](https://github.com/donaldwuid/unreal_source_
 
 ## Contents
 
-1. [Overview](main.md)
-1. [Initialization](initialization.md)
-1. [Loop](loop.md)
-1. [Memory Management](memory.md)
-1. [Thread Management](thread.md)
-1. [Blueprint Visual Scripting](scripting.md)
-1. [Rendering](rendering.md)
-1. [Gameplay](gameplay.md)
+- [Overview](main.md)
+- [Initialization](initialization.md)
+- [Loop](loop.md)
+- [Memory Management](memory.md)
+- [Thread Management](thread.md)
+- [Blueprint Visual Scripting](scripting.md)
+- [Rendering](rendering.md)
+    - [Parallel Rendering](rendering_parallel.md)
+    - [Rendering Resources](rendering_resource.md)
+- [Gameplay](gameplay.md)
 
 # Thread Management
 
@@ -251,4 +253,5 @@ Named task thread are created in various places. But the unnamed task threads ar
 
 You can create your own task as the demo code in `TGraphTask`'s comment([link](https://github.com/EpicGames/UnrealEngine/blob/bf95c2cbc703123e08ab54e3ceccdd47e48d224a/Engine/Source/Runtime/Core/Public/Async/TaskGraphInterfaces.h#L698)). Keep in mind that the task argument can not be references, but pointer is OK.  
 The following image is the call stacks filtered by "TGraphTask", you may notice the both the render thread and the game thread use the task graph to accomplish many important tasks, even include the world ticking.
+
 ![](assets/unreal_task_graph.png)

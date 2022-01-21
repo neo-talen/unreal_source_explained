@@ -17,6 +17,8 @@ See [Table of Contents](toc.md) for the complete content list. Some important co
 - [Thread Management](thread.md)
 - [Blueprint Visual Scripting](scripting.md)
 - [Rendering](rendering.md)
+    - [Parallel Rendering](rendering_parallel.md)
+    - [Rendering Resources](rendering_resource.md)
 - [Gameplay](gameplay.md)
 
 # Memory Management
@@ -80,38 +82,38 @@ void* FMallocBinned::Malloc(SIZE_T Size, uint32 Alignment)
 	}
 	if (bUsePools)
 	{
-	if( Size < BinnedSizeLimit)
-	{
-		// Allocate from pool.
-		...
-		if( !Pool )
+		if( Size < BinnedSizeLimit)
 		{
-			// AllocatePoolMemory() calls mmap() eventually
-			Pool = Private::AllocatePoolMemory(*this, Table, Private::BINNED_ALLOC_POOL_SIZE/*PageSize*/, Size);
+			// Allocate from pool.
+			...
+			if( !Pool )
+			{
+				// AllocatePoolMemory() calls mmap() eventually
+				Pool = Private::AllocatePoolMemory(*this, Table, Private::BINNED_ALLOC_POOL_SIZE/*PageSize*/, Size);
+			}
+			Free = Private::AllocateBlockFromPool(*this, Table, Pool, Alignment);
 		}
-		Free = Private::AllocateBlockFromPool(*this, Table, Pool, Alignment);
-	}
-	else if ( ((Size >= BinnedSizeLimit && Size <= PagePoolTable[0].BlockSize) ||
-		(Size > PageSize && Size <= PagePoolTable[1].BlockSize)))
-	{
-		// Bucket in a pool of 3*PageSize or 6*PageSize
-		...
-		if( !Pool )
+		else if ( ((Size >= BinnedSizeLimit && Size <= PagePoolTable[0].BlockSize) ||
+			(Size > PageSize && Size <= PagePoolTable[1].BlockSize)))
 		{
-			// AllocatePoolMemory() calls mmap() eventually
-			Pool = Private::AllocatePoolMemory(*this, Table, PageCount*PageSize, BinnedSizeLimit+BinType);
-		}
+			// Bucket in a pool of 3*PageSize or 6*PageSize
+			...
+			if( !Pool )
+			{
+				// AllocatePoolMemory() calls mmap() eventually
+				Pool = Private::AllocatePoolMemory(*this, Table, PageCount*PageSize, BinnedSizeLimit+BinType);
+			}
 
-		Free = Private::AllocateBlockFromPool(*this, Table, Pool, Alignment);
-	}
-	else
-	{
-		// Use OS for large allocations.
-		...
-		// OSAlloc() calls mmap()
-		Free = (FFreeMem*)Private::OSAlloc(*this, AlignedSize, ActualPoolSize);
-		...
-	}
+			Free = Private::AllocateBlockFromPool(*this, Table, Pool, Alignment);
+		}
+		else
+		{
+			// Use OS for large allocations.
+			...
+			// OSAlloc() calls mmap()
+			Free = (FFreeMem*)Private::OSAlloc(*this, AlignedSize, ActualPoolSize);
+			...
+		}
 	}
 
 	MEM_TIME(MemTime += FPlatformTime::Seconds());
